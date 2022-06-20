@@ -16,13 +16,13 @@ project "XVRenderer"
 
   includedirs
   {
-    "Include",
+    "Include/XVRenderer",
   }
 
-  externalincludedirs
+  sysincludedirs
   {
-    "Dep/XVUtilities/Include"
-    "Dep/glfw-3.3.7/include/GLFW",
+    "Dep/XVUtilities/Include",
+    "Dep/glfw-3.3.7/include",
     "Dep/glm/glm",
     "$(VULKAN_SDK)/include",
   }
