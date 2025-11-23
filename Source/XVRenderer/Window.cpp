@@ -11,7 +11,7 @@ Window::Window( const WindowConfig &config ) :
   m_height( config.height ),
   m_mode( config.mode )
 {
-  if ( s_glfw_initialised )
+  if ( !s_glfw_initialised )
   {
     if ( glfwInit() != GLFW_TRUE )
       throw std::runtime_error( "[Window] Failed to initialise GLFW!" );
@@ -19,7 +19,21 @@ Window::Window( const WindowConfig &config ) :
     s_glfw_initialised = true;
   }
 
-  glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
+  // Set API-specific window hints
+  if ( config.api == RenderAPI::OpenGL )
+  {
+    glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
+    glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
+    glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
+#ifdef __APPLE__
+    glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE );
+#endif
+  }
+  else if ( config.api == RenderAPI::Vulkan )
+  {
+    glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
+  }
+
   glfwWindowHint( GLFW_VISIBLE, config.visible ? GLFW_TRUE : GLFW_FALSE );
   glfwWindowHint( GLFW_RESIZABLE, config.resizable ? GLFW_TRUE : GLFW_FALSE );
   glfwWindowHint( GLFW_AUTO_ICONIFY, GLFW_FALSE );
@@ -36,9 +50,16 @@ Window::Window( const WindowConfig &config ) :
   m_window = glfwCreateWindow( static_cast<i32>( m_width ), static_cast<i32>( m_height ), config.title.c_str(), monitor, nullptr );
 
   if ( !m_window )
-    throw std::runtime_error( "[Window] Failed to create window" + config.title + "!" );
+    throw std::runtime_error( "[Window] Failed to create window " + config.title + "!" );
   else
     ++s_glfw_windows_count;
+
+  // Make context current for OpenGL
+  if ( config.api == RenderAPI::OpenGL )
+  {
+    glfwMakeContextCurrent( m_window );
+    glfwSwapInterval( 1 ); // Enable vsync
+  }
 }
 
 Window::~Window()

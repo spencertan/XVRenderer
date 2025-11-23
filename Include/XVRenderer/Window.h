@@ -2,6 +2,7 @@
 #include <glfw/glfw3.h>
 #include <vulkan/vulkan.hpp>
 
+#include "RenderAPI.h"
 #include <XVUtilities/Types.h>
 #include <XVUtilities/Helper/NonCopyable.h>
 
@@ -25,6 +26,7 @@ struct WindowConfig
   WindowMode mode;
   bool visible;
   bool resizable;
+  RenderAPI api = RenderAPI::Vulkan;  // Which rendering API to use
 };
 
 
