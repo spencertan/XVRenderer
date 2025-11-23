@@ -163,4 +163,13 @@ void Window::SetDropCallback( GLFWdropfun callback )
   glfwSetDropCallback( m_window, callback );
 }
 
+std::vector<const char*> Window::GetRequiredInstanceExtensions()
+{
+  u32 glfw_extension_count = 0;
+  const char** glfw_extensions = glfwGetRequiredInstanceExtensions( &glfw_extension_count );
+
+  std::vector<const char*> extensions( glfw_extensions, glfw_extensions + glfw_extension_count );
+  return extensions;
+}
+
 }

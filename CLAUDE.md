@@ -8,22 +8,37 @@
 - **Language**: C++ (C++latest standard)
 - **Build System**: Premake5
 - **License**: MIT (Copyright 2022 Xivi)
-- **Platform Target**: Windows (currently uses VC2022 libraries)
+- **Platform Target**: Cross-platform (Windows, macOS, Linux)
+- **Build Note**: Currently uses VC2022 libraries for Windows builds
 
 ## Repository Structure
 
 ```
 XVRenderer/
-├── Include/XVRenderer/    # Public header files
-│   ├── Renderer.h         # Main renderer interface (currently empty, under development)
-│   └── Window.h           # Window management wrapper over GLFW
-├── Source/XVRenderer/     # Implementation files
-│   └── Window.cpp         # Window implementation
-├── Dep/                   # External dependencies
-│   ├── glfw-3.3.7/       # GLFW windowing library (precompiled)
-│   ├── glm/              # OpenGL Mathematics library
-│   └── XVUtilities/      # Git submodule - custom utilities library
-├── premake5.lua          # Build configuration
+├── Include/XVRenderer/        # Public header files
+│   ├── Platform.h             # Platform detection and configuration
+│   ├── VulkanInstance.h       # Vulkan instance wrapper
+│   ├── PhysicalDevice.h       # GPU selection and management
+│   ├── Device.h               # Logical device wrapper
+│   ├── Surface.h              # Window surface abstraction
+│   ├── Swapchain.h            # Swapchain management
+│   ├── Renderer.h             # Main renderer interface
+│   └── Window.h               # Window management wrapper over GLFW
+├── Source/XVRenderer/         # Implementation files
+│   ├── VulkanInstance.cpp     # Instance implementation
+│   ├── PhysicalDevice.cpp     # Physical device implementation
+│   ├── Device.cpp             # Device implementation
+│   ├── Surface.cpp            # Surface implementation
+│   ├── Swapchain.cpp          # Swapchain implementation
+│   ├── Renderer.cpp           # Renderer implementation
+│   └── Window.cpp             # Window implementation
+├── Dep/                       # External dependencies
+│   ├── glfw-3.3.7/           # GLFW windowing library (precompiled)
+│   ├── glm/                  # OpenGL Mathematics library
+│   └── XVUtilities/          # Git submodule - custom utilities library
+├── premake5.lua              # Build configuration
+├── CLAUDE.md                 # This file - AI assistant guide
+├── USAGE_EXAMPLE.md          # Usage examples and documentation
 ├── .gitignore
 ├── .gitmodules
 ├── LICENSE
@@ -159,14 +174,69 @@ The `Window` class is a RAII wrapper around GLFW windows with the following feat
 - Auto-iconify is disabled (`GLFW_AUTO_ICONIFY = GLFW_FALSE`)
 - Reference counting ensures GLFW cleanup only when all windows are destroyed
 
-### Renderer System (Under Development)
+### Renderer System (Foundation Complete)
 
-**Location**: `Include/XVRenderer/Renderer.h`
+**Location**: `Include/XVRenderer/Renderer.h`, `Source/XVRenderer/Renderer.cpp`
 
-Currently empty - this is the primary area of active development. Future implementation will:
-- Wrap Vulkan API with RAII principles
-- Set up the rendering pipeline
-- Manage Vulkan resources (devices, queues, command buffers, etc.)
+The foundation for the Vulkan renderer is now complete with the following components:
+
+#### Platform Detection
+**Location**: `Include/XVRenderer/Platform.h`
+- Cross-platform macros for Windows, macOS, and Linux
+- Automatic Vulkan platform extension detection
+- Debug/Release build detection
+
+#### VulkanInstance
+**Location**: `Include/XVRenderer/VulkanInstance.h`, `Source/XVRenderer/VulkanInstance.cpp`
+- RAII wrapper around vk::Instance
+- Automatic validation layer setup in debug builds
+- Debug messenger for validation output
+- Platform-agnostic extension handling
+- Move semantics support
+
+#### PhysicalDevice
+**Location**: `Include/XVRenderer/PhysicalDevice.h`, `Source/XVRenderer/PhysicalDevice.cpp`
+- Automatic GPU selection with scoring system
+- Queue family detection (graphics, present, compute, transfer)
+- Extension support checking
+- Swapchain capability validation
+- Preference for discrete GPUs
+
+#### Device (Logical Device)
+**Location**: `Include/XVRenderer/Device.h`, `Source/XVRenderer/Device.cpp`
+- RAII wrapper around vk::Device
+- Queue handle management
+- Support for multiple queue families
+- Move semantics support
+
+#### Surface
+**Location**: `Include/XVRenderer/Surface.h`, `Source/XVRenderer/Surface.cpp`
+- Platform-agnostic window surface creation
+- GLFW integration for cross-platform support
+- RAII cleanup
+
+#### Swapchain
+**Location**: `Include/XVRenderer/Swapchain.h`, `Source/XVRenderer/Swapchain.cpp`
+- Automatic format and present mode selection
+- Image and image view management
+- Support for different present modes (FIFO, Mailbox, etc.)
+- Configurable image count (double/triple buffering)
+- RAII cleanup of all resources
+
+#### Renderer (Main Interface)
+**Location**: `Include/XVRenderer/Renderer.h`, `Source/XVRenderer/Renderer.cpp`
+- High-level interface that manages all Vulkan components
+- Automatic initialization of all subsystems
+- Swapchain recreation support (for window resize)
+- Clean shutdown and resource management
+
+**Note**: The renderer foundation is complete. Next steps include adding:
+- Command buffers and command pools
+- Render passes
+- Graphics pipeline
+- Synchronization primitives (semaphores, fences)
+- Vertex/index buffers
+- Descriptor sets
 
 ## Development Workflows
 
@@ -309,18 +379,27 @@ When modifying `premake5.lua`:
 - [x] GLFW window wrapper with RAII
 - [x] Window callback support
 - [x] Basic error handling
+- [x] Platform detection system
+- [x] Vulkan instance with validation layers
+- [x] Physical device selection
+- [x] Logical device creation
+- [x] Surface abstraction
+- [x] Swapchain management
+- [x] Renderer foundation and initialization
+- [x] Cross-platform support (Windows/macOS/Linux)
 
 ### In Progress
-- [ ] Vulkan RAII wrappers
-- [ ] Rendering pipeline setup
-- [ ] Renderer interface design
+- [ ] Command pools and command buffers
+- [ ] Render passes
+- [ ] Graphics pipeline setup
 
 ### Future Considerations
-- [ ] Cross-platform support (Linux, macOS)
-- [ ] Multiple rendering backends
-- [ ] Shader compilation pipeline
-- [ ] Resource management system
+- [ ] Multiple rendering backends (OpenGL, DirectX as fallbacks)
+- [ ] Shader compilation pipeline (GLSL/HLSL to SPIR-V)
+- [ ] Resource management system (buffers, textures, etc.)
 - [ ] Scene graph integration
+- [ ] Material system
+- [ ] Lighting system
 
 ## Questions to Ask Before Making Changes
 

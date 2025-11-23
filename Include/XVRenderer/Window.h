@@ -4,6 +4,9 @@
 
 #include <XVUtilities/Types.h>
 #include <XVUtilities/Helper/NonCopyable.h>
+
+#include <vector>
+
 namespace XV
 {
 
@@ -44,6 +47,15 @@ public:
   void ShowWindow();
   void PollEvents();
   bool ShouldClose();
+
+  // Accessors
+  Ptr<GLFWwindow> GetGLFWWindow() const { return m_window; }
+  u32 GetWidth() const { return m_width; }
+  u32 GetHeight() const { return m_height; }
+  WindowMode GetMode() const { return m_mode; }
+
+  // Vulkan support
+  static std::vector<const char*> GetRequiredInstanceExtensions();
   
   // Callback shared among all windows
   static void SetErrorCallback(GLFWerrorfun callback);
