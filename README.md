@@ -29,6 +29,8 @@ This is a hobby project for learning modern graphics API design and implementati
 - Vertex/Index buffers
 - Shader system
 - Camera system
+- Resource management
+- Scene graph with hierarchical transformations
 - Example applications
 
 ## Current Status
@@ -39,7 +41,13 @@ This is a hobby project for learning modern graphics API design and implementati
 - ✅ Buffer abstractions (vertex, index)
 - ✅ Shader system
 - ✅ Basic 3D camera
+- ✅ **Resource management system (meshes, materials)**
+- ✅ **Material system with properties**
+- ✅ **Scene graph with hierarchical transforms**
+- ✅ **Transform system (position, rotation, scale)**
+- ✅ **Scene renderer with graph traversal**
 - ✅ Colored cube example with interpolated vertex colors
+- ✅ **Scene graph example with hierarchy**
 
 ### In Progress
 - 🔨 Vulkan rendering pipeline
@@ -48,9 +56,8 @@ This is a hobby project for learning modern graphics API design and implementati
 
 ### Planned
 - 📋 Texture system
-- 📋 Advanced lighting
-- 📋 Material system
-- 📋 Scene graph
+- 📋 Advanced lighting (PBR)
+- 📋 Shadow mapping
 
 ## Dependencies
 
@@ -120,6 +127,13 @@ XVRenderer/
 │   ├── IRenderer.h         # Renderer interface
 │   ├── Vertex.h            # Vertex structures
 │   ├── Camera.h            # 3D camera
+│   ├── Mesh.h              # Mesh resource
+│   ├── Material.h          # Material system
+│   ├── ResourceManager.h   # Resource management
+│   ├── Transform.h         # 3D transformations
+│   ├── SceneNode.h         # Scene graph node
+│   ├── Scene.h             # Scene graph manager
+│   ├── SceneRenderer.h     # Scene graph renderer
 │   ├── OpenGL/             # OpenGL backend
 │   │   ├── GLRenderer.h
 │   │   ├── GLBuffer.h
@@ -127,7 +141,8 @@ XVRenderer/
 │   └── [Vulkan headers]    # Vulkan backend
 ├── Source/XVRenderer/      # Implementation
 ├── Examples/               # Example applications
-│   └── ColoredCube.cpp     # Rotating colored cube
+│   ├── ColoredCube.cpp     # Rotating colored cube
+│   └── SceneGraphExample.cpp # Scene hierarchy demo
 ├── Dep/                    # Dependencies
 │   ├── glfw-3.3.7/        # Windowing library
 │   ├── glm/               # Math library
@@ -198,6 +213,71 @@ int main()
 ```
 
 See `Examples/ColoredCube.cpp` for a complete working example.
+
+### Scene Graph Example
+
+```cpp
+#include <XVRenderer/Window.h>
+#include <XVRenderer/OpenGL/GLRenderer.h>
+#include <XVRenderer/Scene.h>
+#include <XVRenderer/SceneRenderer.h>
+
+int main()
+{
+  // Create window and renderer
+  XV::WindowConfig config{
+    "Scene Graph", 1280, 720,
+    XV::WindowMode::Windowed,
+    true, true,
+    XV::RenderAPI::OpenGL
+  };
+  XV::Window window(config);
+  XV::GLRenderer renderer(window);
+
+  // Create scene
+  XV::Scene scene("MainScene", &renderer);
+
+  // Setup camera
+  auto& camera = scene.GetMainCamera();
+  camera.SetPosition(glm::vec3(0, 3, 10));
+
+  // Create resources
+  auto& resources = scene.GetResourceManager();
+  auto* cube_mesh = resources.CreateCubeMesh("Cube");
+  auto* red_mat = resources.CreateColoredMaterial(glm::vec3(1, 0, 0), "Red");
+  auto* green_mat = resources.CreateColoredMaterial(glm::vec3(0, 1, 0), "Green");
+
+  // Create scene hierarchy
+  auto* parent = scene.CreateNode("Parent", cube_mesh, red_mat);
+  parent->GetTransform().SetPosition(glm::vec3(0, 0, 0));
+
+  auto* child = parent->AddChild("Child");
+  child->SetMesh(cube_mesh);
+  child->SetMaterial(green_mat);
+  child->GetTransform().SetPosition(glm::vec3(2, 0, 0));
+  child->GetTransform().SetScale(0.5f);
+
+  // Create scene renderer
+  XV::SceneRenderer scene_renderer(&renderer);
+
+  // Render loop
+  while (!window.ShouldClose()) {
+    renderer.Clear(glm::vec4(0.1f, 0.1f, 0.15f, 1.0f));
+
+    // Animate
+    parent->GetTransform().Rotate(0.01f, glm::vec3(0, 1, 0));
+
+    // Render scene
+    scene_renderer.Render(scene);
+
+    renderer.EndFrame();
+  }
+
+  return 0;
+}
+```
+
+See `Examples/SceneGraphExample.cpp` for a complete hierarchical scene with multiple levels.
 
 ## Documentation
 

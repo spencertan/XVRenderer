@@ -1,7 +1,7 @@
 workspace "XVRenderer"
   architecture "x64"
   configurations { "Debug", "Release" }
-  startproject "ColoredCubeExample"
+  startproject "SceneGraphExample"
 
   filter "configurations:Debug"
     defines { "DEBUG" }
@@ -79,6 +79,48 @@ project "ColoredCubeExample"
   files
   {
     "Examples/ColoredCube.cpp"
+  }
+
+  includedirs
+  {
+    "Include",
+  }
+
+  sysincludedirs
+  {
+    "Dep/XVUtilities/Include",
+    "Dep/glfw-3.3.7/include",
+    "Dep/glm/glm",
+    "Dep/glad/include",
+    "$(VULKAN_SDK)/include",
+  }
+
+  links
+  {
+    "XVRenderer",
+  }
+
+  -- Make sure library is built first
+  dependson { "XVRenderer" }
+
+  -- Link library path
+  libdirs
+  {
+    "build/%{cfg.buildcfg}/lib"
+  }
+
+-- Scene Graph Example
+project "SceneGraphExample"
+  kind "ConsoleApp"
+  language "C++"
+  cppdialect "C++latest"
+
+  targetdir "build/%{cfg.buildcfg}/bin"
+  objdir "build/%{cfg.buildcfg}/obj/%{prj.name}"
+
+  files
+  {
+    "Examples/SceneGraphExample.cpp"
   }
 
   includedirs

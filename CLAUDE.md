@@ -274,10 +274,58 @@ Fully functional OpenGL 3.3 Core renderer:
 - Automatic fallback from Vulkan to OpenGL
 - API capability checking
 
+#### Resource Management
+**Location**: `Include/XVRenderer/Mesh.h`, `Material.h`, `ResourceManager.h`
+
+- **Mesh**: GPU-agnostic mesh resource
+  - Vertex and index data storage
+  - Automatic upload to GPU per API
+  - Predefined meshes (cube, plane)
+  - Works with both OpenGL and Vulkan
+
+- **Material**: Material properties and shaders
+  - PBR-style properties (albedo, metallic, roughness)
+  - API-specific compilation
+  - Future texture support
+
+- **ResourceManager**: Centralized resource management
+  - Create and manage meshes, materials
+  - Automatic naming and tracking
+  - Prevents duplicate resources
+  - Statistics and cleanup
+
+#### Scene Graph System
+**Location**: `Include/XVRenderer/Transform.h`, `SceneNode.h`, `Scene.h`, `SceneRenderer.h`
+
+- **Transform**: 3D transformation component
+  - Position, rotation (quaternion), scale
+  - Local matrix caching with dirty flags
+  - Direction vectors (forward, right, up)
+
+- **SceneNode**: Hierarchical scene graph node
+  - Parent-child relationships
+  - Local and world transformations
+  - Mesh and material attachments
+  - Active/inactive state
+  - Automatic world matrix propagation
+
+- **Scene**: Scene graph manager
+  - Root node management
+  - Integrated resource manager
+  - Main camera
+  - Helper methods for node creation
+
+- **SceneRenderer**: Scene graph traversal and rendering
+  - Depth-first traversal
+  - Automatic matrix propagation
+  - Per-node rendering with materials
+  - Works with both APIs
+
 #### Examples
 **Location**: `Examples/`
 
-- **ColoredCube.cpp**: Complete example rendering a rotating 3D cube with interpolated vertex colors using OpenGL
+- **ColoredCube.cpp**: Simple rotating 3D cube with interpolated vertex colors
+- **SceneGraphExample.cpp**: Hierarchical scene with parent-child relationships, multiple objects, and animated transformations
 
 ## Development Workflows
 
@@ -434,11 +482,18 @@ When modifying `premake5.lua`:
 - [x] **Shader system (OpenGL)**
 - [x] **3D Camera system**
 - [x] **Example: Colored rotating cube**
+- [x] **Mesh resource abstraction**
+- [x] **Material system with PBR properties**
+- [x] **Resource manager with centralized management**
+- [x] **Transform system with quaternions**
+- [x] **Scene graph with hierarchical nodes**
+- [x] **Scene manager with integrated resources**
+- [x] **Scene renderer with graph traversal**
+- [x] **Scene graph example with hierarchy**
 
 ### In Progress
 - [ ] Vulkan rendering implementation (command buffers, render passes, pipeline)
-- [ ] Texture system
-- [ ] Material system
+- [ ] Texture system with loading and binding
 
 ### Future Considerations
 - [ ] DirectX backend (Windows)
